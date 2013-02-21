@@ -369,7 +369,7 @@ my_bool vio_poll_read(Vio *vio,uint timeout)
   fds.fd=vio->sd;
   fds.events=POLLIN;
   fds.revents=0;
-  if ((res=poll(&fds,1,(int) timeout*1000)) <= 0)
+  if ((res=poll(&fds,1,(int) timeout)) <= 0)
   {
     DBUG_RETURN(res < 0 ? 0 : 1);		/* Don't return 1 on errors */
   }
@@ -391,8 +391,8 @@ void vio_timeout(Vio *vio, uint which, uint timeout)
 #else
   /* POSIX specifies time as struct timeval. */
   struct timeval wait_timeout;
-  wait_timeout.tv_sec= timeout;
-  wait_timeout.tv_usec= 0;
+  wait_timeout.tv_sec= timeout / 1000;
+  wait_timeout.tv_usec= timeout % 1000 * 1000;
 #endif
 
   r= setsockopt(vio->sd, SOL_SOCKET, which ? SO_SNDTIMEO : SO_RCVTIMEO,
